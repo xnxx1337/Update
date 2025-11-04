@@ -1,8 +1,18 @@
 -- Gui to Lua
 -- Version: 3.2
+-- Code amélioré pour la robustesse et la gestion des erreurs
+
+-- Services
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+
+-- Vérification si on est bien dans un environnement où on peut utiliser writefile/readfile
+local canUseFileSystem = pcall(function() local _ = writefile end)
 
 -- Instances:
-
 local plaguecheatcc = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local TopBar = Instance.new("TextLabel")
@@ -15,27 +25,25 @@ local Section1 = Instance.new("Frame")
 local SectionText1 = Instance.new("TextLabel")
 local checkbox = Instance.new("TextButton")
 local TextLabel = Instance.new("TextLabel")
-local SliderTrack = Instance.new("Frame") -- Renommé pour plus de clarté
-local SliderHandle = Instance.new("Frame") -- Le curseur qu'on déplace
+local SliderTrack = Instance.new("Frame")
+local SliderHandle = Instance.new("Frame")
 local MinusLabel = Instance.new("TextButton")
 local PlusLabel = Instance.new("TextButton")
 local TextLabel_2 = Instance.new("TextLabel")
 local TextButton = Instance.new("TextButton")
 local Section2 = Instance.new("Frame")
 local SectionText2 = Instance.new("TextLabel")
--- AJOUT DES SECTIONS MANQUANTES POUR LES ONGLETS
-local Section3 = Instance.new("Frame") -- Pour Visuals
+local Section3 = Instance.new("Frame")
 local SectionText3 = Instance.new("TextLabel")
-local Section4 = Instance.new("Frame") -- Pour Rage
+local Section4 = Instance.new("Frame")
 local SectionText4 = Instance.new("TextLabel")
 local FrameFps = Instance.new("Frame")
 local trace_2 = Instance.new("TextLabel")
 local TextLabel_3 = Instance.new("TextLabel")
 
 --Properties:
-
-plaguecheatcc.Name = "plaguecheat.cc"
-plaguecheatcc.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+plaguecheatcc.Name = "plaguecheatcc"
+plaguecheatcc.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 plaguecheatcc.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 Frame.Parent = plaguecheatcc
@@ -44,12 +52,11 @@ Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Frame.BorderSizePixel = 0
 Frame.Position = UDim2.new(0.281938314, 0, 0.217088073, 0)
 Frame.Size = UDim2.new(0, 692, 0, 469)
-Frame.Visible = false -- Le menu commence fermé
+Frame.Visible = false
 
 TopBar.Name = "TopBar"
 TopBar.Parent = Frame
 TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-TopBar.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TopBar.BorderSizePixel = 0
 TopBar.Position = UDim2.new(0, 0, -0.0533049032, 0)
 TopBar.Size = UDim2.new(0, 692, 0, 25)
@@ -62,7 +69,6 @@ TopBar.TextXAlignment = Enum.TextXAlignment.Left
 trace.Name = "trace"
 trace.Parent = TopBar
 trace.BackgroundColor3 = Color3.fromRGB(62, 124, 186)
-trace.BorderColor3 = Color3.fromRGB(0, 0, 0)
 trace.BorderSizePixel = 0
 trace.Position = UDim2.new(0, 0, 1, 0)
 trace.Size = UDim2.new(0, 692, 0, 1)
@@ -75,7 +81,6 @@ RageTabs.Name = "RageTabs"
 RageTabs.Parent = TopBar
 RageTabs.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 RageTabs.BackgroundTransparency = 1.000
-RageTabs.BorderColor3 = Color3.fromRGB(0, 0, 0)
 RageTabs.BorderSizePixel = 0
 RageTabs.Position = UDim2.new(0.783236921, 0, 0.0799999982, 0)
 RageTabs.Size = UDim2.new(0, 35, 0, 21)
@@ -88,7 +93,6 @@ VisualsTabs.Name = "VisualsTabs"
 VisualsTabs.Parent = TopBar
 VisualsTabs.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 VisualsTabs.BackgroundTransparency = 1.000
-VisualsTabs.BorderColor3 = Color3.fromRGB(0, 0, 0)
 VisualsTabs.BorderSizePixel = 0
 VisualsTabs.Position = UDim2.new(0.833814919, 0, 0.0799999982, 0)
 VisualsTabs.Size = UDim2.new(0, 42, 0, 21)
@@ -101,7 +105,6 @@ SkinsTabs.Name = "SkinsTabs"
 SkinsTabs.Parent = TopBar
 SkinsTabs.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SkinsTabs.BackgroundTransparency = 1.000
-SkinsTabs.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SkinsTabs.BorderSizePixel = 0
 SkinsTabs.Position = UDim2.new(0.8945086, 0, 0.0799999982, 0)
 SkinsTabs.Size = UDim2.new(0, 33, 0, 21)
@@ -114,29 +117,24 @@ MiscTabs.Name = "MiscTabs"
 MiscTabs.Parent = TopBar
 MiscTabs.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MiscTabs.BackgroundTransparency = 1.000
-MiscTabs.BorderColor3 = Color3.fromRGB(0, 0, 0)
 MiscTabs.BorderSizePixel = 0
 MiscTabs.Position = UDim2.new(0.942196548, 0, 0.0799999982, 0)
 MiscTabs.Size = UDim2.new(0, 33, 0, 21)
 MiscTabs.Font = Enum.Font.SourceSans
 MiscTabs.Text = "Misc"
-MiscTabs.TextColor3 = Color3.fromRGB(255, 255, 255) -- Actif par défaut
+MiscTabs.TextColor3 = Color3.fromRGB(255, 255, 255)
 MiscTabs.TextSize = 14.000
 
--- SECTION 1 (Misc)
 Section1.Name = "Section1"
 Section1.Parent = Frame
 Section1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Section1.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Section1.BorderSizePixel = 0
 Section1.Position = UDim2.new(0.0101156067, 0, 0.0149253728, 0)
 Section1.Size = UDim2.new(0, 333, 0, 454)
 
 SectionText1.Name = "SectionText1"
 SectionText1.Parent = Section1
-SectionText1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SectionText1.BackgroundTransparency = 1.000
-SectionText1.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SectionText1.BorderSizePixel = 0
 SectionText1.Position = UDim2.new(0, 0, 0.00220264308, 0)
 SectionText1.Size = UDim2.new(0, 58, 0, 21)
@@ -159,7 +157,6 @@ checkbox.TextSize = 14.000
 TextLabel.Parent = checkbox
 TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel.BackgroundTransparency = 1.000
-TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel.BorderSizePixel = 0
 TextLabel.Position = UDim2.new(1.66666663, 0, 0, 0)
 TextLabel.Size = UDim2.new(0, 80, 0, 12)
@@ -169,7 +166,6 @@ TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel.TextSize = 14.000
 TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- SLIDER
 SliderTrack.Name = "SliderTrack"
 SliderTrack.Parent = Section1
 SliderTrack.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -181,8 +177,7 @@ SliderHandle.Name = "SliderHandle"
 SliderHandle.Parent = SliderTrack
 SliderHandle.BackgroundColor3 = Color3.fromRGB(62, 124, 186)
 SliderHandle.BorderSizePixel = 0
-SliderHandle.Position = UDim2.new(0, 0, 0, 0)
-SliderHandle.Size = UDim2.new(0, 100, 0, 6) -- Taille initiale (50%)
+SliderHandle.Size = UDim2.new(0.5, 0, 1, 0) -- 50% par défaut
 SliderHandle.Font = Enum.Font.SourceSans
 SliderHandle.Text = ""
 SliderHandle.TextColor3 = Color3.fromRGB(0, 0, 0)
@@ -192,7 +187,6 @@ MinusLabel.Name = "MinusLabel"
 MinusLabel.Parent = SliderTrack
 MinusLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MinusLabel.BackgroundTransparency = 1.000
-MinusLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 MinusLabel.BorderSizePixel = 0
 MinusLabel.Position = UDim2.new(-0.05, 0, -0.5, 0)
 MinusLabel.Size = UDim2.new(0, 10, 0, 14)
@@ -206,7 +200,6 @@ PlusLabel.Name = "PlusLabel"
 PlusLabel.Parent = SliderTrack
 PlusLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 PlusLabel.BackgroundTransparency = 1.000
-PlusLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 PlusLabel.BorderSizePixel = 0
 PlusLabel.Position = UDim2.new(1.05, 0, -0.5, 0)
 PlusLabel.Size = UDim2.new(0, 10, 0, 14)
@@ -219,7 +212,6 @@ PlusLabel.TextXAlignment = Enum.TextXAlignment.Center
 TextLabel_2.Parent = SliderTrack
 TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_2.BackgroundTransparency = 1.000
-TextLabel_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_2.BorderSizePixel = 0
 TextLabel_2.Position = UDim2.new(0.5, -21, 1.5, 0)
 TextLabel_2.Size = UDim2.new(0, 42, 0, 14)
@@ -238,21 +230,17 @@ TextButton.Text = "Print Button"
 TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextButton.TextSize = 14.000
 
--- SECTION 2 (Skins)
 Section2.Name = "Section2"
 Section2.Parent = Frame
 Section2.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Section2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Section2.BorderSizePixel = 0
 Section2.Position = UDim2.new(0.510115623, 0, 0.0149253728, 0)
 Section2.Size = UDim2.new(0, 332, 0, 454)
-Section2.Visible = false -- Caché par défaut
+Section2.Visible = false
 
 SectionText2.Name = "SectionText2"
 SectionText2.Parent = Section2
-SectionText2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SectionText2.BackgroundTransparency = 1.000
-SectionText2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SectionText2.BorderSizePixel = 0
 SectionText2.Size = UDim2.new(0, 58, 0, 21)
 SectionText2.Font = Enum.Font.SourceSans
@@ -260,11 +248,9 @@ SectionText2.Text = "Section 2"
 SectionText2.TextColor3 = Color3.fromRGB(130, 130, 130)
 SectionText2.TextSize = 14.000
 
--- SECTION 3 (Visuals) - NOUVEAU
 Section3.Name = "Section3"
 Section3.Parent = Frame
 Section3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Section3.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Section3.BorderSizePixel = 0
 Section3.Position = UDim2.new(0.0101156067, 0, 0.0149253728, 0)
 Section3.Size = UDim2.new(0, 333, 0, 454)
@@ -272,9 +258,7 @@ Section3.Visible = false
 
 SectionText3.Name = "SectionText3"
 SectionText3.Parent = Section3
-SectionText3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SectionText3.BackgroundTransparency = 1.000
-SectionText3.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SectionText3.BorderSizePixel = 0
 SectionText3.Position = UDim2.new(0, 0, 0.00220264308, 0)
 SectionText3.Size = UDim2.new(0, 58, 0, 21)
@@ -283,11 +267,9 @@ SectionText3.Text = "Section 3"
 SectionText3.TextColor3 = Color3.fromRGB(130, 130, 130)
 SectionText3.TextSize = 14.000
 
--- SECTION 4 (Rage) - NOUVEAU
 Section4.Name = "Section4"
 Section4.Parent = Frame
 Section4.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Section4.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Section4.BorderSizePixel = 0
 Section4.Position = UDim2.new(0.510115623, 0, 0.0149253728, 0)
 Section4.Size = UDim2.new(0, 332, 0, 454)
@@ -295,9 +277,7 @@ Section4.Visible = false
 
 SectionText4.Name = "SectionText4"
 SectionText4.Parent = Section4
-SectionText4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SectionText4.BackgroundTransparency = 1.000
-SectionText4.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SectionText4.BorderSizePixel = 0
 SectionText4.Size = UDim2.new(0, 58, 0, 21)
 SectionText4.Font = Enum.Font.SourceSans
@@ -305,11 +285,9 @@ SectionText4.Text = "Section 4"
 SectionText4.TextColor3 = Color3.fromRGB(130, 130, 130)
 SectionText4.TextSize = 14.000
 
--- FPS COUNTER
 FrameFps.Name = "FrameFps"
 FrameFps.Parent = plaguecheatcc
 FrameFps.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-FrameFps.BorderColor3 = Color3.fromRGB(0, 0, 0)
 FrameFps.BorderSizePixel = 0
 FrameFps.Position = UDim2.new(0.0201638266, 0, 0.0504587255, 0)
 FrameFps.Size = UDim2.new(0, 224, 0, 23)
@@ -317,7 +295,6 @@ FrameFps.Size = UDim2.new(0, 224, 0, 23)
 trace_2.Name = "trace"
 trace_2.Parent = FrameFps
 trace_2.BackgroundColor3 = Color3.fromRGB(62, 124, 186)
-trace_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 trace_2.BorderSizePixel = 0
 trace_2.Position = UDim2.new(0, 0, -0.0476190336, 0)
 trace_2.Size = UDim2.new(0, 224, 0, 1)
@@ -329,7 +306,6 @@ trace_2.TextSize = 14.000
 TextLabel_3.Parent = FrameFps
 TextLabel_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_3.BackgroundTransparency = 1.000
-TextLabel_3.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_3.BorderSizePixel = 0
 TextLabel_3.Position = UDim2.new(0, 0, 0.260869235, 0)
 TextLabel_3.Size = UDim2.new(0, 224, 0, 10)
@@ -339,24 +315,25 @@ TextLabel_3.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_3.TextSize = 14.000
 TextLabel_3.TextXAlignment = Enum.TextXAlignment.Left
 
-
 -- Scripts:
-
-local function UI_Controller() -- Fonction principale pour toute la logique
-    local UserInputService = game:GetService("UserInputService")
-    local RunService = game:GetService("RunService")
-    local HttpService = game:GetService("HttpService")
-    local TweenService = game:GetService("TweenService")
-    
+local function UI_Controller()
     local mainFrame = Frame
     local topBar = TopBar
     local fpsLabel = TextLabel_3
     
     -- === SYSTÈME DE SAUVEGARDE ===
-    local Options = {}
+    local Options = {
+        checkbox_state = false,
+        slider_value = 50,
+        menu_key = Enum.KeyCode.L
+    }
     local ConfigFileName = "plaguecheat_config.json"
 
     local function SaveConfig()
+        if not canUseFileSystem then
+            warn("Impossible de sauvegarder : writefile n'est pas activé.")
+            return
+        end
         local success, encoded = pcall(function()
             return HttpService:JSONEncode(Options)
         end)
@@ -369,6 +346,10 @@ local function UI_Controller() -- Fonction principale pour toute la logique
     end
 
     local function LoadConfig()
+        if not canUseFileSystem then
+            warn("Impossible de charger : readfile n'est pas activé.")
+            return
+        end
         if not isfile(ConfigFileName) then
             print("Aucune configuration trouvée.")
             return
@@ -391,7 +372,7 @@ local function UI_Controller() -- Fonction principale pour toute la logique
         end
     end
 
-    -- === DRAG & TOGGLE (déjà là, juste un peu nettoyé) ===
+    -- === DRAG & TOGGLE ===
     local dragging = false
     local dragStart, startPos
     
@@ -436,21 +417,19 @@ local function UI_Controller() -- Fonction principale pour toute la logique
             switchTab(name)
         end)
     end
-    switchTab("MiscTabs") -- Assure que le premier onglet est bien sélectionné
+    switchTab("MiscTabs")
 
     -- === FONCTIONNALITÉ CHECKBOX ===
-    Options.checkbox_state = false -- Valeur par défaut
     checkbox.MouseButton1Click:Connect(function()
         Options.checkbox_state = not Options.checkbox_state
         checkbox.BackgroundColor3 = Options.checkbox_state and Color3.fromRGB(0, 162, 255) or Color3.fromRGB(25, 25, 25)
         print("Checkbox est maintenant:", Options.checkbox_state)
-        SaveConfig() -- Sauvegarde à chaque changement
+        SaveConfig()
     end)
 
     -- === FONCTIONNALITÉ SLIDER ===
     local sliderMin = 0
     local sliderMax = 100
-    Options.slider_value = 50 -- Valeur par défaut
     
     local function updateSlider(val)
         Options.slider_value = math.clamp(val, sliderMin, sliderMax)
@@ -460,14 +439,12 @@ local function UI_Controller() -- Fonction principale pour toute la logique
         tween:Play()
         TextLabel_2.Text = tostring(math.floor(Options.slider_value))
         print("Slider value:", Options.slider_value)
-        SaveConfig() -- Sauvegarde à chaque changement
+        SaveConfig()
     end
     
     SliderTrack.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local moveConnection
-            local releaseConnection
-            
+            local moveConnection, releaseConnection
             moveConnection = UserInputService.InputChanged:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseMovement then
                     local mousePos = input.Position
@@ -477,11 +454,10 @@ local function UI_Controller() -- Fonction principale pour toute la logique
                     updateSlider(sliderMin + (sliderMax - sliderMin) * percent)
                 end
             end)
-            
             releaseConnection = UserInputService.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    moveConnection:Disconnect()
-                    releaseConnection:Disconnect()
+                    if moveConnection then moveConnection:Disconnect() end
+                    if releaseConnection then releaseConnection:Disconnect() end
                 end
             end)
         end
@@ -547,7 +523,6 @@ local function UI_Controller() -- Fonction principale pour toute la logique
         if not waitingForKey then
             waitingForKey = true
             MenuKeybindButton.Text = "[...]"
-            
             local connection
             connection = UserInputService.InputBegan:Connect(function(input)
                 if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.MouseButton2 then
@@ -556,17 +531,16 @@ local function UI_Controller() -- Fonction principale pour toute la logique
                     print("La touche pour ouvrir le menu est maintenant:", input.KeyCode)
                     SaveConfig()
                     waitingForKey = false
-                    connection:Disconnect()
+                    if connection then connection:Disconnect() end
                 end
             end)
         end
     end)
 
-    -- === LOGIQUE DE TOUCHE POUR OUVRIR/FERMER (AVEC KEYBIND DYNAMIQUE) ===
+    -- === LOGIQUE DE TOUCHE POUR OUVRIR/FERMER ===
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
-        local keyToCheck = Options.menu_key or Enum.KeyCode.L
-        if input.KeyCode == keyToCheck then
+        if input.KeyCode == Options.menu_key then
             mainFrame.Visible = not mainFrame.Visible
         end
     end)
@@ -577,9 +551,10 @@ local function UI_Controller() -- Fonction principale pour toute la logique
     RunService.Heartbeat:Connect(function()
         local now = tick()
         local delta = now - lastTick
-        fps = math.floor(1 / delta)
+        if delta > 0 then
+            fps = math.floor(1 / delta)
+        end
         lastTick = now
-        
         local overlayStatus = mainFrame.Visible and "ON" or "OFF"
         fpsLabel.Text = string.format("  SkyCheat.cc | fps : %d | Overlay : %s", fps, overlayStatus)
     end)
