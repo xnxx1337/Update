@@ -1,6 +1,7 @@
--- Gui to Lua
--- Version: 3.2
--- Code amélioré pour la robustesse et la gestion des erreurs
+-- =================================================================
+-- SCRIPT PRINCIPAL POUR TON GUI (plaguecheat.cc)
+-- Version corrigée et robuste
+-- =================================================================
 
 -- Services
 local UserInputService = game:GetService("UserInputService")
@@ -9,10 +10,13 @@ local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 
--- Vérification si on est bien dans un environnement où on peut utiliser writefile/readfile
+-- Vérification si l'environnement autorise l'écriture/lecture de fichiers (pour la sauvegarde)
 local canUseFileSystem = pcall(function() local _ = writefile end)
 
--- Instances:
+-- =================================================================
+-- CRÉATION DE L'INTERFACE (TON DESIGN)
+-- =================================================================
+
 local plaguecheatcc = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local TopBar = Instance.new("TextLabel")
@@ -33,15 +37,15 @@ local TextLabel_2 = Instance.new("TextLabel")
 local TextButton = Instance.new("TextButton")
 local Section2 = Instance.new("Frame")
 local SectionText2 = Instance.new("TextLabel")
-local Section3 = Instance.new("Frame")
+local Section3 = Instance.new("Frame") -- Pour Visuals
 local SectionText3 = Instance.new("TextLabel")
-local Section4 = Instance.new("Frame")
+local Section4 = Instance.new("Frame") -- Pour Rage
 local SectionText4 = Instance.new("TextLabel")
 local FrameFps = Instance.new("Frame")
 local trace_2 = Instance.new("TextLabel")
 local TextLabel_3 = Instance.new("TextLabel")
 
---Properties:
+-- Propriétés de l'interface
 plaguecheatcc.Name = "plaguecheatcc"
 plaguecheatcc.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 plaguecheatcc.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -52,7 +56,7 @@ Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Frame.BorderSizePixel = 0
 Frame.Position = UDim2.new(0.281938314, 0, 0.217088073, 0)
 Frame.Size = UDim2.new(0, 692, 0, 469)
-Frame.Visible = false
+Frame.Visible = false -- Le menu commence fermé
 
 TopBar.Name = "TopBar"
 TopBar.Parent = Frame
@@ -122,9 +126,10 @@ MiscTabs.Position = UDim2.new(0.942196548, 0, 0.0799999982, 0)
 MiscTabs.Size = UDim2.new(0, 33, 0, 21)
 MiscTabs.Font = Enum.Font.SourceSans
 MiscTabs.Text = "Misc"
-MiscTabs.TextColor3 = Color3.fromRGB(255, 255, 255)
+MiscTabs.TextColor3 = Color3.fromRGB(255, 255, 255) -- Actif par défaut
 MiscTabs.TextSize = 14.000
 
+-- Section 1 (Misc)
 Section1.Name = "Section1"
 Section1.Parent = Frame
 Section1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -166,6 +171,7 @@ TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel.TextSize = 14.000
 TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 
+-- Slider
 SliderTrack.Name = "SliderTrack"
 SliderTrack.Parent = Section1
 SliderTrack.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -230,6 +236,7 @@ TextButton.Text = "Print Button"
 TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextButton.TextSize = 14.000
 
+-- Section 2 (Skins)
 Section2.Name = "Section2"
 Section2.Parent = Frame
 Section2.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -248,6 +255,7 @@ SectionText2.Text = "Section 2"
 SectionText2.TextColor3 = Color3.fromRGB(130, 130, 130)
 SectionText2.TextSize = 14.000
 
+-- Section 3 (Visuals)
 Section3.Name = "Section3"
 Section3.Parent = Frame
 Section3.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -267,6 +275,7 @@ SectionText3.Text = "Section 3"
 SectionText3.TextColor3 = Color3.fromRGB(130, 130, 130)
 SectionText3.TextSize = 14.000
 
+-- Section 4 (Rage)
 Section4.Name = "Section4"
 Section4.Parent = Frame
 Section4.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -285,6 +294,7 @@ SectionText4.Text = "Section 4"
 SectionText4.TextColor3 = Color3.fromRGB(130, 130, 130)
 SectionText4.TextSize = 14.000
 
+-- FPS Counter
 FrameFps.Name = "FrameFps"
 FrameFps.Parent = plaguecheatcc
 FrameFps.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -315,13 +325,17 @@ TextLabel_3.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_3.TextSize = 14.000
 TextLabel_3.TextXAlignment = Enum.TextXAlignment.Left
 
--- Scripts:
+
+-- =================================================================
+-- LOGIQUE DE FONCTIONNALITÉ
+-- =================================================================
+
 local function UI_Controller()
     local mainFrame = Frame
     local topBar = TopBar
     local fpsLabel = TextLabel_3
     
-    -- === SYSTÈME DE SAUVEGARDE ===
+    -- === SYSTÈME DE SAUVEGARDE (ROBUSTE) ===
     local Options = {
         checkbox_state = false,
         slider_value = 50,
@@ -331,7 +345,7 @@ local function UI_Controller()
 
     local function SaveConfig()
         if not canUseFileSystem then
-            warn("Impossible de sauvegarder : writefile n'est pas activé.")
+            warn("[Sauvegarde] Impossible de sauvegarder : les fonctions de fichier sont désactivées.")
             return
         end
         local success, encoded = pcall(function()
@@ -339,19 +353,19 @@ local function UI_Controller()
         end)
         if success then
             writefile(ConfigFileName, encoded)
-            print("Configuration sauvegardée !")
+            print("[Sauvegarde] Configuration sauvegardée avec succès !")
         else
-            warn("Erreur lors de la sauvegarde de la config :", encoded)
+            warn("[Sauvegarde] Erreur lors de la sauvegarde :", encoded)
         end
     end
 
     local function LoadConfig()
         if not canUseFileSystem then
-            warn("Impossible de charger : readfile n'est pas activé.")
+            warn("[Chargement] Impossible de charger : les fonctions de fichier sont désactivées.")
             return
         end
         if not isfile(ConfigFileName) then
-            print("Aucune configuration trouvée.")
+            print("[Chargement] Aucune configuration trouvée. Utilisation des valeurs par défaut.")
             return
         end
         local success, decoded = pcall(function()
@@ -359,7 +373,7 @@ local function UI_Controller()
         end)
         if success and type(decoded) == "table" then
             Options = decoded
-            print("Configuration chargée !")
+            print("[Chargement] Configuration chargée avec succès !")
             
             -- Mettre à jour l'UI avec les valeurs chargées
             checkbox.BackgroundColor3 = Options.checkbox_state and Color3.fromRGB(0, 162, 255) or Color3.fromRGB(25, 25, 25)
@@ -368,7 +382,7 @@ local function UI_Controller()
                 MenuKeybindButton.Text = "[" .. tostring(Options.menu_key):gsub("Enum.KeyCode.", "") .. "]"
             end
         else
-            warn("Erreur lors du chargement de la config :", decoded)
+            warn("[Chargement] Erreur lors du chargement de la config :", decoded)
         end
     end
 
@@ -450,8 +464,10 @@ local function UI_Controller()
                     local mousePos = input.Position
                     local sliderPos = SliderTrack.AbsolutePosition
                     local sliderSize = SliderTrack.AbsoluteSize
-                    local percent = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
-                    updateSlider(sliderMin + (sliderMax - sliderMin) * percent)
+                    if sliderSize.X > 0 then -- Évite la division par zéro
+                        local percent = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
+                        updateSlider(sliderMin + (sliderMax - sliderMin) * percent)
+                    end
                 end
             end)
             releaseConnection = UserInputService.InputEnded:Connect(function(input)
@@ -562,4 +578,6 @@ local function UI_Controller()
     -- Charger la configuration au démarrage
     LoadConfig()
 end
+
+-- Lancement du script
 coroutine.wrap(UI_Controller)()
